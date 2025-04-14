@@ -22,8 +22,7 @@ namespace ConditionallyDesignable
             if (GetService(typeof(BehaviorService)) is BehaviorService behaviorSvc &&
                 Control is not null)
             {
-                var behavior = new ImmutableSurfaceBehavior(behaviorSvc, Control);
-                behaviorSvc.PushBehavior(behavior);
+                behaviorSvc.PushBehavior(new ImmutableSurfaceBehavior(behaviorSvc, Control));
                 Control?.Log($"BehaviorService is online.");
             }
             else

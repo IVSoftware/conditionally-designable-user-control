@@ -35,10 +35,10 @@
             // 
             userControlEx.BackColor = Color.FromArgb(68, 68, 68);
             userControlEx.ContentType = ContentType.Immutable;
-            userControlEx.Dock = DockStyle.Fill;
             userControlEx.Location = new Point(20, 20);
+            userControlEx.LogFilePath = null;
             userControlEx.Name = "userControlEx";
-            userControlEx.Size = new Size(438, 204);
+            userControlEx.Size = new Size(235, 30);
             userControlEx.TabIndex = 0;
             // 
             // MainForm
