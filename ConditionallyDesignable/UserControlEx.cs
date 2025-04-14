@@ -60,28 +60,60 @@ namespace ConditionallyDesignable
         [Editor("System.Windows.Forms.Design.FileNameEditor, System.Design", typeof(UITypeEditor))]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         [Description("Design-time logging path.")]
-        public string? LogFilePath { get; set; }
-
-        internal void Log(string msg, bool append = true)
+        public string? LogFilePath
         {
-            msg =
-                msg.EndsWith(Environment.NewLine)
-                ? msg
-                : $"{msg}{Environment.NewLine}";
-
-            if(!string.IsNullOrWhiteSpace(LogFilePath))
+            get => _logFilePath;
+            set
             {
-                if(append && File.Exists(LogFilePath))
+                if (!Equals(_logFilePath, value))
                 {
-                    File.AppendAllText(LogFilePath, msg);
-                }
-                else 
-                { 
-                    File.WriteAllText(LogFilePath, msg);
+                    _logFilePath = value;
+                    if (_memoryLog.Any() && !string.IsNullOrWhiteSpace(_logFilePath))
+                    {
+                        var msgInfo = _memoryLog.Dequeue();
+                        Log(msgInfo.msg, append: false);
+                        while (_memoryLog.Count > 0)
+                        {
+                            msgInfo = _memoryLog.Dequeue();
+                            Log(msgInfo.msg, msgInfo.append);
+                        }
+                    }                       
                 }
             }
         }
 
+        string? _logFilePath = null;
+
+        internal void Log(string msg, bool append = true)
+        {
+            if (DesignMode)
+            {
+                msg =
+                    msg.EndsWith(Environment.NewLine)
+                    ? msg
+                    : $"{msg}{Environment.NewLine}";
+
+                bool success = false;
+                if (!string.IsNullOrWhiteSpace(LogFilePath))
+                {
+                    if (append && File.Exists(LogFilePath))
+                    {
+                        File.AppendAllText(LogFilePath, msg);
+                        success = true;
+                    }
+                    else
+                    {
+                        File.WriteAllText(LogFilePath, msg);
+                        success = true;
+                    }
+                }
+                if (!success)
+                {
+                    _memoryLog.Enqueue((msg: msg, append: append));
+                }
+            }
+        }
+        private readonly Queue<(string msg, bool append)> _memoryLog = new();
 
         protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         {

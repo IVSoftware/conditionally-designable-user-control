@@ -17,7 +17,7 @@ namespace ConditionallyDesignable
             base.Initialize(component);
             // Control should exist now.
             Control?.Log($"{DateTime.Now}", append: false);
-            Control?.Log($"Version 1.2.2");
+            Control?.Log($"Version 1.2.3");
 
             if (GetService(typeof(BehaviorService)) is BehaviorService behaviorSvc &&
                 Control is not null)
@@ -53,6 +53,7 @@ namespace ConditionallyDesignable
                 ContentType.Immutable => ContentType.Designable,
                 _ => ContentType.Immutable,
             };
+
         public new UserControlEx Control => (UserControlEx)base.Control;
         protected override void OnDragOver(DragEventArgs de)
         {
@@ -67,14 +68,10 @@ namespace ConditionallyDesignable
         }
         protected override void OnDragDrop(DragEventArgs de)
         {
-            switch (Control.ContentType)
+            if(Control.ContentType == ContentType.Designable)
             {
-                case ContentType.Designable:
-                    base.OnDragDrop(de);
-                    break;
-                case ContentType.Immutable:
-                default:
-                    break;
+                // Allow
+                base.OnDragDrop(de);
             }
         }
     }
