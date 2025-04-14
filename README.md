@@ -4,7 +4,7 @@ This repo contains a prototype that is a minimal example of doing this.
 
 ___
 
-First, subclass `Microsoft.DotNet.DesignTools.Designers.ParentControlDesigner` in order to customize the designer behavior `UserControlEx` and set the `Designer` attribute of the user control.
+First, subclass `Microsoft.DotNet.DesignTools.Designers.ParentControlDesigner` in order to customize the designer behavior for `UserControlEx` and set the `Designer` attribute of the user control.
 
 ```
 // <PackageReference Include="Microsoft.WinForms.Designer.SDK" Version="1.6.0" />
@@ -162,6 +162,11 @@ As a result, the typical strategies we've come to rely on are ineffective. These
 - Overriding `CanAddComponent` or `CanBeParentedTo` in the custom designer
 - Intercepting `OnDragDrop` (which only applies to drag-and-drop)
 
+However, working around this can be fairly straightforward.
+___
+
+##### Push the Behavior
+
 ```csharp
 public override void Initialize(IComponent component)
 {
@@ -170,14 +175,11 @@ public override void Initialize(IComponent component)
         Control is not null)
     {
         behaviorSvc.PushBehavior(new ImmutableSurfaceBehavior(behaviorSvc, Control));
-        Control?.Log($"BehaviorService is online.");
-    }
-    else
-    {
-        Control?.Log($"BehaviorService could not be obtained.");
     }
 }
 ```
+
+##### Implement the Behavior
 
 This `Behavior` implementation uses adorner-layer hit-testing to selectively suppress mouse interaction over the control. The condition shown here is based on a user-defined property `ContentType` on a subclassed control (`UserControlEx`), which determines whether the surface should be interactive at design time:
 
